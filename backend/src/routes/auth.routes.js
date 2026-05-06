@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { register, login, getMe } = require('../controllers/auth.controller');
+const { register, login, getMe, updateProfile, changePassword } = require('../controllers/auth.controller');
 const auth = require('../middleware/auth');
 const { authLimiter } = require('../middleware/rateLimiter');
 const { body } = require('express-validator');
@@ -16,5 +16,7 @@ router.post('/login', authLimiter, [
 ], login);
 
 router.get('/me', auth, getMe);
+router.put('/profile', auth, updateProfile);
+router.put('/password', auth, changePassword);
 
 module.exports = router;
