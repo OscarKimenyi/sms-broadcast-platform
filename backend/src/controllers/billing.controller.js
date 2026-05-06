@@ -122,6 +122,32 @@ exports.verifyPayment = async (req, res) => {
                 [`Credit top-up: ${credits} SMS`, session_reference]
             );
             await conn.commit();
+            const [[userRow]] = await db.query('SELECT * FROM users WHERE id = ?', [userId]);
+            if (userRow.email_notifications) {
+                emailService.sendPaymentReceipt(userRow, credits, selected?.amount || 0);
+            }
+
+            // Handle referral bonus on first purchase
+            const [referral] = await db.query(
+                `SELECT r.*, u.email as referrer_email, u.name as referrer_name, u.email_notifications
+   FROM referrals r
+   JOIN users u ON r.referrer_id = u.id
+   WHERE r.referred_id = ? AND r.bonus_credited = 0`,
+                [userId]
+            );
+            if (referral.length) {
+                const bonus = parseInt(process.env.REFERRAL_BONUS_CREDITS || '100');
+                await db.query('UPDATE users SET sms_credits = sms_credits + ? WHERE id = ?', [bonus, referral[0].referrer_id]);
+                await db.query('UPDATE referrals SET bonus_credited = 1 WHERE id = ?', [referral[0].id]);
+                await db.query(
+                    `INSERT INTO credit_transactions (user_id, credits_change, type, description)
+     VALUES (?, ?, 'topup', 'Referral bonus')`,
+                    [referral[0].referrer_id, bonus]
+                );
+                if (referral[0].email_notifications) {
+                    emailService.sendReferralBonus({ id: referral[0].referrer_id, email: referral[0].referrer_email, name: referral[0].referrer_name }, bonus);
+                }
+            }
         } catch (e) {
             await conn.rollback();
             throw e;
