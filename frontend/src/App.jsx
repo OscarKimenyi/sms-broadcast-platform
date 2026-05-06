@@ -9,6 +9,11 @@ import CampaignDetail from './pages/CampaignDetail'
 import Contacts from './pages/Contacts'
 import Inbox from './pages/Inbox'
 import Billing from './pages/Billing'
+import SenderIds from './pages/SenderIds'
+import Templates from './pages/Templates'
+import ApiKeys from './pages/ApiKeys'
+import Settings from './pages/Settings'
+import Admin from './pages/Admin'
 
 export default function App() {
   return (
@@ -22,9 +27,14 @@ export default function App() {
         <Route path="campaigns/new" element={<NewCampaign />} />
         <Route path="campaigns/:id" element={<CampaignDetail />} />
         <Route path="contacts" element={<Contacts />} />
+        <Route path="sender-ids" element={<SenderIds />} />
+        <Route path="templates" element={<Templates />} />
         <Route path="inbox" element={<Inbox />} />
         <Route path="billing" element={<Billing />} />
         <Route path="billing/verify" element={<Billing />} />
+        <Route path="api-keys" element={<ApiKeys />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="admin" element={<Admin />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
