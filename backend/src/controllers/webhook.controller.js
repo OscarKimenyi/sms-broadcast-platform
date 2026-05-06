@@ -136,13 +136,25 @@ exports.deliveryReport = async (req, res) => {
 exports.inboundSMS = async (req, res) => {
     try {
         const { from, to, text } = req.body;
+        const message = (text || '').trim().toUpperCase();
+
+        // Handle opt-out
+        const STOP_KEYWORDS = ['STOP', 'UNSUBSCRIBE', 'QUIT', 'CANCEL', 'END'];
+        if (STOP_KEYWORDS.includes(message)) {
+            await db.query(
+                `UPDATE contacts SET status = 'unsubscribed'
+         WHERE phone_number = ? AND status = 'active'`,
+                [from]
+            );
+            console.log(`Opt-out: ${from} unsubscribed`);
+            res.sendStatus(200);
+            return;
+        }
 
         const [senders] = await db.query(
-            `SELECT user_id FROM sender_ids
-       WHERE sender_name = ? AND status = 'approved'`,
+            `SELECT user_id FROM sender_ids WHERE sender_name = ? AND status = 'approved'`,
             [to]
         );
-
         const userId = senders.length ? senders[0].user_id : null;
 
         await db.query(
@@ -153,7 +165,7 @@ exports.inboundSMS = async (req, res) => {
 
         res.sendStatus(200);
     } catch (err) {
-        console.error('Inbound SMS webhook error:', err);
+        console.error('Inbound SMS error:', err);
         res.sendStatus(200);
     }
 };
