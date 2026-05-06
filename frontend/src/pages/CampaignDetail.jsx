@@ -1,6 +1,8 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getCampaign, getCampaignLogs, sendCampaign } from '../api/campaigns'
+import { duplicateCampaign, exportCampaignLogs } from '../api/campaigns'
+import { Copy, Download } from 'lucide-react'
 import Card from '../components/ui/Card'
 import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
@@ -30,6 +32,26 @@ export default function CampaignDetail() {
         }
     }
 
+    const handleDuplicate = async () => {
+        try {
+            const res = await duplicateCampaign(id)
+            toast.success('Campaign duplicated!')
+            navigate(`/campaigns/${res.data.id}`)
+        } catch { toast.error('Failed to duplicate') }
+    }
+
+    const handleExport = async (format) => {
+        try {
+            const res = await exportCampaignLogs(id, format)
+            const url = window.URL.createObjectURL(new Blob([res.data]))
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `campaign_${id}_report.${format}`
+            a.click()
+            window.URL.revokeObjectURL(url)
+        } catch { toast.error('Export failed') }
+    }
+
     if (isLoading) return <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '4rem' }}><Spinner size={32} /></div>
     if (!campaign) return <p style={{ color: 'var(--text-muted)' }}>Campaign not found.</p>
 
@@ -54,6 +76,9 @@ export default function CampaignDetail() {
                 {['draft', 'failed'].includes(campaign.status) && (
                     <Button onClick={handleSend}><Send size={14} /> Send Now</Button>
                 )}
+                <Button variant="secondary" onClick={handleDuplicate}><Copy size={14} /> Duplicate</Button>
+                <Button variant="secondary" size="sm" onClick={() => handleExport('csv')}><Download size={13} /> CSV</Button>
+                <Button variant="secondary" size="sm" onClick={() => handleExport('excel')}><Download size={13} /> Excel</Button>
             </div>
 
             {/* Stats */}
