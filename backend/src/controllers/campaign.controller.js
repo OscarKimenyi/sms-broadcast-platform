@@ -129,3 +129,23 @@ exports.deleteCampaign = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+exports.duplicateCampaign = async (req, res) => {
+    try {
+        const [campaigns] = await db.query(
+            'SELECT * FROM campaigns WHERE id = ? AND user_id = ?',
+            [req.params.id, req.user.id]
+        );
+        if (!campaigns.length) return res.status(404).json({ message: 'Campaign not found' });
+        const c = campaigns[0];
+
+        const [result] = await db.query(
+            `INSERT INTO campaigns (user_id, sender_id, list_id, name, message_body, status, total_recipients)
+       VALUES (?, ?, ?, ?, ?, 'draft', ?)`,
+            [c.user_id, c.sender_id, c.list_id, `${c.name} (Copy)`, c.message_body, c.total_recipients]
+        );
+        res.status(201).json({ message: 'Campaign duplicated', id: result.insertId });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error' });
+    }
+};
