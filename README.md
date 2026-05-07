@@ -2,6 +2,8 @@
 
 > A full-stack SaaS bulk SMS broadcasting platform built for the East African market. Businesses upload contact lists, write campaigns, and deliver SMS to thousands of recipients in seconds — with real-time delivery tracking, analytics, and a pay-per-use credit system.
 
+![smspulse](https://res.cloudinary.com/dhyo79gy1/image/upload/v1778133322/smspulse_gd6maa.png)
+
 ![Stack](https://img.shields.io/badge/Backend-Node.js%20%7C%20Express.js-green?style=flat-square)
 ![Stack](https://img.shields.io/badge/Frontend-React.js%20%7C%20Vite-blue?style=flat-square)
 ![Database](https://img.shields.io/badge/Database-MySQL-orange?style=flat-square)
@@ -222,7 +224,7 @@ Before running this project, make sure you have the following installed:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/sms-platform.git
+git clone https://github.com/OscarKimenyi/sms-platform.git
 cd sms-platform
 ```
 
